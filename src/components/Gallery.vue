@@ -76,7 +76,6 @@ export default {
           this.picturesFlickr.push(url_m);
         }
         this.activePic = photoArr[0].url_m;
-        console.log(photoArr);
       });
   },
   data() {
@@ -106,8 +105,7 @@ export default {
     onFileSelected(event) {
       this.selectedFile = event.target.files[0];
       const obj = Object.assign(event.target.files[0]);
-      console.dir(obj);
-
+      console.log(obj);
       localStorage.setItem("selectedFile", obj.name);
     },
     uploadRandomImg() {
@@ -120,7 +118,6 @@ export default {
         .then((response) => response.json())
         .then(({ photos: { photo: photoArr } }) => {
           this.activePic = photoArr[randomImgIndex].url_m;
-          console.log(photoArr);
         });
     },
     changeActivePic(index) {
