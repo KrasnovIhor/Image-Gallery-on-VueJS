@@ -9,13 +9,24 @@
         class="picture-container"
         v-for="(picture, index) in picturesFlickr"
         :key="index"
+        ref="pictureCont"
         @click="changeActivePic(index)"
-        @mouseover="hovering"
-        @mouseleave="unhovering"
+        @mouseover="hovering(index)"
+        @mouseleave="unhover(index)"
       >
         <img :src="picture" alt="pic" />
-        <div :class="isActive(index)" class="inactive-window"></div>
-        <img class="delete-btn" src="assets/delete.png" alt="delete-btn" />
+        <div
+          ref="modalWindow"
+          :class="isActive(index)"
+          class="inactive-window"
+        ></div>
+        <img
+          ref="deleteBtn"
+          class="delete-btn"
+          src="assets/delete.png"
+          alt="delete-btn"
+          @click="deleteItem(index)"
+        />
       </div>
     </div>
     <div class="preview-btns">
@@ -89,19 +100,13 @@ export default {
         "active-window": this.activePic === this.picturesFlickr[index],
       };
     },
-    hovering(event) {
-      event.target.classList.add("hover");
-      event.target.nextElementSibling.classList.add("active-delete");
-      console.log(event);
+    hovering(index) {
+      this.$refs.modalWindow[index].classList.add("hover");
+      this.$refs.deleteBtn[index].classList.add("active-delete");
     },
-    unhovering(event) {
-      event.target.nextElementSibling.classList.remove("active-delete");
+    unhover(index) {
+      this.$refs.deleteBtn[index].classList.remove("active-delete");
     },
-    // hideBtn(event) {
-    //   return {
-    //     "inactive-btn": this.activePic === this.picturesFlickr[index],
-    //   };
-    // },
     slideTransform() {
       const slider = document.querySelector(".pictures");
       slider.style.transform = `translateX(${
@@ -118,9 +123,8 @@ export default {
       this.counter--;
       this.slideTransform();
     },
-    deleteItem() {
-      // console.log(this);
-      // this.deleteItem();
+    deleteItem(index) {
+      this.$refs.pictureCont[index].remove();
     },
   },
 };
@@ -171,6 +175,9 @@ button {
     right: 10px;
     z-index: 10;
     transition: bottom 0.3s ease-in-out;
+    &:hover {
+      bottom: 7px;
+    }
   }
 
   .active-delete {
