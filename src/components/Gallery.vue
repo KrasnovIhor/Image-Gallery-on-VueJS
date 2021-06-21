@@ -105,7 +105,10 @@ export default {
   methods: {
     onFileSelected(event) {
       this.selectedFile = event.target.files[0];
-      console.log(this.selectedFile);
+      const obj = Object.assign(event.target.files[0]);
+      console.dir(obj);
+
+      localStorage.setItem("selectedFile", obj.name);
     },
     uploadRandomImg() {
       let randomImgIndex =
