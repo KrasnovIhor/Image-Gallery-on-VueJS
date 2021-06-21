@@ -10,17 +10,31 @@
         v-for="(picture, index) in picturesFlickr"
         :key="index"
         @click="changeActivePic(index)"
+        @mouseover="hovering"
+        @mouseleave="unhovering"
       >
-        <img @click="deleteItem()" :src="picture" alt="pic" />
+        <img :src="picture" alt="pic" />
+        <div :class="isActive(index)" class="inactive-window"></div>
+        <img class="delete-btn" src="assets/delete.png" alt="delete-btn" />
       </div>
     </div>
-    <button :disabled="this.counter <= 0" @click="prevSlides()">PREV</button>
-    <button
-      :disabled="this.counter >= this.picturesFlickr.length / 9 - 1"
-      @click="nextSlides()"
-    >
-      NEXT
-    </button>
+    <div class="preview-btns">
+      <button class="prevBtn" :disabled="this.counter <= 0" @click="prevSlides">
+        <img src="assets/Arrow-right.png" alt="arrow-right" />
+      </button>
+      <span
+        >{{ this.counter + 1 }} /
+        {{ Math.round(this.picturesFlickr.length / 9) }}</span
+      >
+      <button
+        class="nextBtn"
+        :disabled="this.counter >= this.picturesFlickr.length / 9 - 1"
+        @click="nextSlides"
+      >
+        <img src="assets/Arrow-left.png" alt="arrow-left" />
+      </button>
+    </div>
+    <input type="file" @change="onFileSelected" />
   </div>
 </template>
 
@@ -33,10 +47,10 @@ export default {
     )
       .then((response) => response.json())
       .then(({ photos: { photo: photoArr } }) => {
-        photoArr.forEach((photoObj) => {
-          const { url_m } = photoObj;
+        for (let i = 0; i < 36; i++) {
+          const { url_m } = photoArr[i];
           this.picturesFlickr.push(url_m);
-        });
+        }
         this.activePic = photoArr[0].url_m;
       });
   },
@@ -58,12 +72,36 @@ export default {
         "assets/Tie_dye.jpg",
         "assets/Vaporwave_wallpaper.jpg",
       ],
+      selectedFile: null,
+      isHovering: false,
     };
   },
   methods: {
+    onFileSelected(event) {
+      this.selectedFile = event.target.files[0];
+      console.log(this.selectedFile);
+    },
     changeActivePic(index) {
       this.activePic = this.picturesFlickr[index];
     },
+    isActive(index) {
+      return {
+        "active-window": this.activePic === this.picturesFlickr[index],
+      };
+    },
+    hovering(event) {
+      event.target.classList.add("hover");
+      event.target.nextElementSibling.classList.add("active-delete");
+      console.log(event);
+    },
+    unhovering(event) {
+      event.target.nextElementSibling.classList.remove("active-delete");
+    },
+    // hideBtn(event) {
+    //   return {
+    //     "inactive-btn": this.activePic === this.picturesFlickr[index],
+    //   };
+    // },
     slideTransform() {
       const slider = document.querySelector(".pictures");
       slider.style.transform = `translateX(${
@@ -72,15 +110,12 @@ export default {
     },
     nextSlides() {
       if (this.counter >= this.picturesFlickr.length / 9 - 1) return;
-      console.log(this.counter);
       this.counter++;
       this.slideTransform();
     },
     prevSlides() {
       if (this.counter <= 0) return;
-      console.log(this.counter);
       this.counter--;
-
       this.slideTransform();
     },
     deleteItem() {
@@ -92,11 +127,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+button {
+  border: none;
+  background: 0 0;
+}
+
 .picture-wrapper {
-  width: 1455px;
+  width: 100%;
+  max-width: 1452px;
   margin: 0 auto;
   overflow: hidden;
 }
+
 .picture-preview {
   width: 1000px;
   height: 600px;
@@ -108,24 +150,97 @@ export default {
     object-fit: cover;
   }
 }
+
+.active-window {
+  top: 100% !important;
+}
+
 .pictures {
+  position: relative;
   display: grid;
   grid-template-rows: auto;
   grid-template-columns: repeat(1000, auto);
   grid-gap: 24px;
   transition: transform 0.4s ease-in-out;
-  // overflow: hidden;
+  max-width: 1452px;
+  .delete-btn {
+    width: 23px;
+    height: 27px;
+    position: absolute;
+    bottom: -60px;
+    right: 10px;
+    z-index: 10;
+    transition: bottom 0.3s ease-in-out;
+  }
+
+  .active-delete {
+    bottom: 7px;
+  }
+
   .picture-container {
+    position: relative;
     width: 140px;
     height: 140px;
+    margin: 0 auto;
+    overflow: hidden;
   }
+
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    cursor: pointer;
   }
-  max-width: 1452px;
-  margin: 0 auto;
+
+  .inactive-window {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.5);
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    transition: top 0.3s ease-in-out;
+    cursor: pointer;
+  }
+}
+
+.preview-btns {
+  margin-top: 34px;
+
+  .prevBtn {
+    margin-right: 91px;
+  }
+
+  .nextBtn {
+    margin-left: 91px;
+  }
+
+  .prevBtn,
+  .nextBtn {
+    position: relative;
+    top: 50%;
+    width: 45px;
+    height: 100%;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  span {
+    display: inline-block;
+    font-size: 58px;
+    height: 100%;
+  }
+}
+
+.hover {
+  &:hover {
+    top: 100px;
+  }
 }
 </style>
 
