@@ -33,10 +33,7 @@
       <button class="prevBtn" :disabled="this.counter <= 0" @click="prevSlides">
         <img src="assets/Arrow-right.png" alt="arrow-right" />
       </button>
-      <span
-        >{{ this.counter + 1 }} /
-        {{ Math.round(this.picturesFlickr.length / 9) }}</span
-      >
+      <span>{{ this.counter + 1 }} / {{ Math.round(this.totalPics / 9) }}</span>
       <button
         class="nextBtn"
         :disabled="this.counter >= this.picturesFlickr.length / 9 - 1"
@@ -45,7 +42,23 @@
         <img src="assets/Arrow-left.png" alt="arrow-left" />
       </button>
     </div>
-    <input type="file" @change="onFileSelected" />
+    <div class="upload-btns">
+      <input
+        style="display: none"
+        ref="fileInput"
+        type="file"
+        @change="onFileSelected"
+      />
+      <button
+        @click="$refs.fileInput.click()"
+        class="upload-btn upload-btn-user"
+      >
+        Upload new image
+      </button>
+      <button @click="uploadRandomImg" class="upload-btn upload-btn-flickr">
+        Upload from Flickr
+      </button>
+    </div>
   </div>
 </template>
 
@@ -58,18 +71,20 @@ export default {
     )
       .then((response) => response.json())
       .then(({ photos: { photo: photoArr } }) => {
-        for (let i = 0; i < 36; i++) {
+        for (let i = 0; i < this.totalPics; i++) {
           const { url_m } = photoArr[i];
           this.picturesFlickr.push(url_m);
         }
         this.activePic = photoArr[0].url_m;
+        console.log(photoArr);
       });
   },
   data() {
     return {
-      counter: 1,
+      counter: 0,
       api: "c4657ca0f0bcefb6e4d09b69edf2dfd0",
       activePic: "",
+      totalPics: 36,
       picturesFlickr: [],
       pictures: [
         "assets/Bubbles.jpg",
@@ -91,6 +106,19 @@ export default {
     onFileSelected(event) {
       this.selectedFile = event.target.files[0];
       console.log(this.selectedFile);
+    },
+    uploadRandomImg() {
+      let randomImgIndex =
+        Math.floor(Math.random() * (100 - this.totalPics + 1)) + this.totalPics;
+      console.log(randomImgIndex);
+      fetch(
+        `https://api.flickr.com/services/rest/?method=flickr.photos.search&format=json&nojsoncallback=1&api key=${this.api}&extras=url_m&text=nature'`
+      )
+        .then((response) => response.json())
+        .then(({ photos: { photo: photoArr } }) => {
+          this.activePic = photoArr[randomImgIndex].url_m;
+          console.log(photoArr);
+        });
     },
     changeActivePic(index) {
       this.activePic = this.picturesFlickr[index];
@@ -125,6 +153,8 @@ export default {
     },
     deleteItem(index) {
       this.$refs.pictureCont[index].remove();
+      if (this.totalPics < 1.1) this.totalPics;
+      this.totalPics--;
     },
   },
 };
@@ -137,6 +167,9 @@ button {
 }
 
 .picture-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   max-width: 1452px;
   margin: 0 auto;
@@ -248,6 +281,19 @@ button {
   &:hover {
     top: 100px;
   }
+}
+
+.upload-btns {
+  display: flex;
+  min-width: 425px;
+  justify-content: space-between;
+}
+.upload-btn {
+  width: 200px;
+  height: 35px;
+  border-radius: 35px;
+  background-color: #252525;
+  color: white;
 }
 </style>
 
